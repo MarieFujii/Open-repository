@@ -1,0 +1,71 @@
+import gab.opencv.*;
+import processing.video.*;
+import java.awt.Rectangle;
+
+OpenCV opencv;
+Capture capture;
+
+PImage inputPhoto;
+
+Rectangle[] faces;
+
+// Screenshot count
+int cnt = 1;
+
+void setup() {
+  
+  opencv = new OpenCV(this, 640, 480);
+  
+  opencv.loadCascade(OpenCV.CASCADE_FRONTALFACE);
+  
+  size(opencv.width, opencv.height);
+  
+  frameRate(24);
+ 
+  inputPhoto = loadImage("cannot_show.gif");
+
+  capture = new Capture(this, width, height);
+  
+  capture.start();
+  
+  imageMode(CORNER);
+}
+
+void draw() {
+  scale(2);
+
+  opencv.loadImage(capture);
+
+  image(capture, 0, 0 );
+
+  noFill();
+
+  Rectangle[] faces = opencv.detect();
+
+  println(faces.length);
+
+  for (int i = 0; i < faces.length; i++) {
+
+    image(inputPhoto, faces[i].x - 10, faces[i].y, faces[i].width + 10, faces[i].height + 10);
+
+  }  
+}
+
+void captureEvent(Capture camera) {
+
+  camera.read();
+
+}
+
+void keyPressed() {
+ 
+  if(key == 'p' || key == 'P') {
+    // save picture 
+    save("screenshot" + cnt++ + ".png");
+ 
+  }
+  if(key == 'e' || key == 'E') {
+    // end
+    exit();
+  }
+}
