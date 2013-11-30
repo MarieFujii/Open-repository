@@ -1,6 +1,7 @@
 import gab.opencv.*;
 import processing.video.*;
 import java.awt.Rectangle;
+import java.util.regex.*;
 
 OpenCV opencv;
 Capture capture;
@@ -12,6 +13,8 @@ Rectangle[] faces;
 // Screenshot count
 int cnt = 1;
 
+String imageFilePath = "";
+
 void setup() {
   
   opencv = new OpenCV(this, 640, 480);
@@ -21,9 +24,19 @@ void setup() {
   size(opencv.width, opencv.height);
   
   frameRate(24);
- 
-  inputPhoto = loadImage("cannot_show.gif");
 
+  try {
+    selectInput("Select image file:", "fileSelected");
+    while (imageFilePath.length() == 0) {
+      Thread.sleep(1000);
+    }
+    inputPhoto = loadImage(imageFilePath);
+  }
+  catch (Exception e) {
+    e.printStackTrace();
+    exit();
+  }
+  
   capture = new Capture(this, width, height);
   
   capture.start();
@@ -32,11 +45,14 @@ void setup() {
 }
 
 void draw() {
-  scale(2);
-
+  
+  if (imageFilePath.length() == 0) {
+    return;
+  }
+  
   opencv.loadImage(capture);
 
-  image(capture, 0, 0 );
+  image(capture, 0, 0);
 
   noFill();
 
@@ -68,4 +84,25 @@ void keyPressed() {
     // end
     exit();
   }
+}
+
+void fileSelected(File selection) {
+  String result = "";
+  
+  if (selection != null) {
+    result = selection.getAbsolutePath();
+    Pattern imageFilePattern = Pattern.compile("\\.(jpg|gif|png)$");
+    Matcher imageFileMatcher = imageFilePattern.matcher(result);
+    if (imageFileMatcher.find() == false){
+      println("not image file: " + result);
+      exit();
+    }
+  }
+  else {
+    println("not selected.");
+    exit();
+  }
+  
+  imageFilePath = result;
+
 }
